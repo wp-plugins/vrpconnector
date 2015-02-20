@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="VRPConnector Test Suite" tests="9" assertions="26" failures="0" errors="0" time="0.336347">
+    <testsuite name="CalendarTest" file="/Users/haqur/sites/VRPConnector/tests/classes/CalendarTest.php" tests="6" assertions="15" failures="0" errors="0" time="0.075285">
+      <testcase name="testEmptyConstructor" class="CalendarTest" file="/Users/haqur/sites/VRPConnector/tests/classes/CalendarTest.php" line="11" assertions="4" time="0.027749"/>
+      <testsuite name="CalendarTest::testFullDateConstructor" tests="1" assertions="4" failures="0" errors="0" time="0.013421">
+        <testcase name="testFullDateConstructor with data set #0" assertions="4" time="0.013421"/>
+      </testsuite>
+      <testsuite name="CalendarTest::testYearMonthConstructor" tests="1" assertions="2" failures="0" errors="0" time="0.002397">
+        <testcase name="testYearMonthConstructor with data set #0" assertions="2" time="0.002397"/>
+      </testsuite>
+      <testsuite name="CalendarTest::testSetGetDatePartsFromDate" tests="1" assertions="3" failures="0" errors="0" time="0.023189">
+        <testcase name="testSetGetDatePartsFromDate with data set #0" assertions="3" time="0.023189"/>
+      </testsuite>
+      <testsuite name="CalendarTest::testDayOfWeek" tests="1" assertions="1" failures="0" errors="0" time="0.002209">
+        <testcase name="testDayOfWeek with data set #0" assertions="1" time="0.002209"/>
+      </testsuite>
+      <testsuite name="CalendarTest::testOutputCalendar" tests="1" assertions="1" failures="0" errors="0" time="0.006320">
+        <testcase name="testOutputCalendar with data set #0" assertions="1" time="0.006320"/>
+      </testsuite>
+    </testsuite>
+    <testsuite name="DummyResultTest" file="/Users/haqur/sites/VRPConnector/tests/classes/DummyResultTest.php" tests="2" assertions="10" failures="0" errors="0" time="0.259221">
+      <testcase name="testConstruct" class="DummyResultTest" file="/Users/haqur/sites/VRPConnector/tests/classes/DummyResultTest.php" line="12" assertions="3" time="0.256368"/>
+      <testcase name="testDefaultPropertyValues" class="DummyResultTest" file="/Users/haqur/sites/VRPConnector/tests/classes/DummyResultTest.php" line="29" assertions="7" time="0.002853"/>
+    </testsuite>
+    <testsuite name="VRPConnectorTest" file="/Users/haqur/sites/VRPConnector/tests/classes/VRPConnectorTest.php" tests="1" assertions="1" failures="0" errors="0" time="0.001841">
+      <testcase name="testWillPass" class="VRPConnectorTest" file="/Users/haqur/sites/VRPConnector/tests/classes/VRPConnectorTest.php" line="10" assertions="1" time="0.001841"/>
+    </testsuite>
+  </testsuite>
+</testsuites>
