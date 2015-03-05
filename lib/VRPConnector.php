@@ -18,15 +18,13 @@ class VRPConnector
     public $otheractions = array();                //
     public $time;                                  // Time (in seconds?) spent making calls to the API
     public $debug = array();                       // Container for debug data
-
+	public $action = false; // VRP Action 
     /**
      * Class Construct
      */
     public function __construct()
     {
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
+
 
         $this->apiKey = get_option('vrpAPI');
 
@@ -38,7 +36,12 @@ class VRPConnector
         $this->actions();
         $this->themeActions();
     }
-
+	/**
+	 * Use the demo API key.
+	 */
+	function __load_demo_key(){
+		$this->apiKey='1533020d1121b9fea8c965cd2c978296';
+	}
     /**
      * Class Destruct w/basic debugging.
      */
@@ -48,19 +51,19 @@ class VRPConnector
             return false;
         }
 
-        if (!isset($_GET['action'])) {
+        if (!$this->is_vrp_page()) {
             return false;
         }
 
         echo "<div style='position:absolute;left:0;width:100%;background:white;color:black;'>";
-        echo "API Time Spent: " . $this->time . "<br/>";
+        echo "API Time Spent: " . esc_html($this->time) . "<br/>";
         echo "GET VARIABLES:<br><pre>";
         print_r($_GET);
         echo "</pre>";
         echo "Debug VARIABLES:<br><pre>";
         print_r($this->debug);
         echo "</pre>";
-        echo "Post Type: " . $wp->query_vars["post_type"];
+        echo "Post Type: " . esc_html($wp->query_vars["post_type"]);
         echo "</div>";
     }
 
@@ -75,24 +78,20 @@ class VRPConnector
         }
 
         // Actions
-        add_action("init", array($this, "ajax"));
-        add_action("init", array($this, "sitemap"));
-        add_action('init', array($this, "featuredunit"));
-        add_action("init", array($this, "otheractions"));
-        add_action('init', array($this, "do_rewrite11"));
-        add_action('init', array($this, "villafilter"));
-        add_action('cacheClear', array($this, "clearCache"), 1, 3);
+        add_action('init', array($this, 'ajax'));
+        add_action('init', array($this, 'sitemap'));
+        add_action('init', array($this, 'featuredunit'));
+        add_action('init', array($this, 'otheractions'));
+        add_action('init', array($this, 'rewrite'));
+        add_action('init', array($this, 'villafilter'));
         add_action('parse_request', array($this, 'router'));
+		add_action('update_option_vrpApiKey',array($this,'flush_rewrites'),10,2);
+		add_action('update_option_vrpAPI',array($this,'flush_rewrites'),10,2);
+		add_action( 'wp', array( $this, 'remove_filters' ) );
 
-        // Filters
+		// Filters
         add_filter('robots_txt', array($this, 'robots_mod'), 10, 2);
-        add_filter('query_vars', array($this, 'wp_insertMyRewriteQueryVars'));
         remove_filter('template_redirect', 'redirect_canonical');
-
-        if (isset($_GET['action'])) {
-            remove_filter('the_content', 'wptexturize');
-            remove_filter('the_content', 'wpautop');
-        }
 
         // Shortcodes
 
@@ -157,11 +156,27 @@ class VRPConnector
     /**
      * Uses built-in rewrite rules to get pretty URL. (/vrp/)
      */
-    public function do_rewrite11()
+    public function rewrite()
     {
-        add_rewrite_rule('vrp/([^/]+)/?([^/]+)/?$', '?action=$1&slug=$2', 'top');
-        //add_rewrite_rule('^vrp/([^/]*)/([^/]*)/?','index.php?action=$matches[1]&slug=$matches[2]','top');
+		add_rewrite_tag('%action%', '([^&]+)');
+		add_rewrite_tag('%slug%', '([^&]+)');
+        add_rewrite_rule('^vrp/([^/]*)/([^/]*)/?', 'index.php?action=$matches[1]&slug=$matches[2]', 'top');
+		
     }
+	
+	/**
+	 * Only on activation.
+	 */
+	static function rewrite_activate()
+	{
+		add_rewrite_tag('%action%', '([^&]+)');
+		add_rewrite_tag('%slug%', '([^&]+)');
+        add_rewrite_rule('^vrp/([^/]*)/([^/]*)/?', 'index.php?action=$matches[1]&slug=$matches[2]', 'top');
+		
+	}
+	function flush_rewrites($old,$new){
+		flush_rewrite_rules();
+	}
 
     /**
      * Sets up action and slug as query variable.
@@ -170,33 +185,31 @@ class VRPConnector
      *
      * @return $vars[]
      */
-    public function wp_insertMyRewriteQueryVars($vars)
+    public function query_vars($vars)
     {
         array_push($vars, 'action', 'slug', 'other');
         return $vars;
     }
 
     /**
-     * Checks to see if dws_slug is active, if so, sets up a page.
+     * Checks to see if VRP slug is active, if so, sets up a page.
      *
      * @return bool
      */
-    public function router()
+    public function router($query)
     {
 
-        if (!isset($_GET['action'])) {
+        if (!isset($query->query_vars['action'])) {
             return false;
         }
-
-        if ($_GET['action'] == 'xml') {
+        if ($query->query_vars['action'] == 'xml') {
             $this->xmlexport();
         }
 
-        if ($_GET['action'] == 'flipkey') {
+        if ($query->query_vars['action'] == 'flipkey') {
             $this->getflipkey();
         }
-
-        add_filter('the_posts', array($this, "filterPosts"));
+        add_filter('the_posts', array($this, "filterPosts"),1,2);
     }
 
     /**
@@ -204,18 +217,19 @@ class VRPConnector
      *
      * @return array
      */
-    public function filterPosts($posts)
+    public function filterPosts($posts,$query)
     {
-        if (!isset($_GET['action'])) {
+	
+        if (!isset($query->query_vars['action'])) {
             return false;
         }
         $pagetitle = "";
-        $action    = $_GET['action'];
+        $action    = $query->query_vars['action'];
 
         switch ($action) {
             case "unit": // If Unit Page.
                 $this->time = microtime(true);
-                $slug       = $_GET['slug'];
+                $slug       = $query->query_vars['slug'];
                 $data2      = $this->call("getunit/" . $slug);
                 $data       = json_decode($data2);
 
@@ -257,12 +271,6 @@ class VRPConnector
 
                 $data2 = $this->call("getspecial/" . $slug);
                 $data  = json_decode($data2);
-                if (!isset($data->Error)) {
-                    $this->cache($action, $slug, $data2);
-
-                    $_GET['API'] = "YES";
-                }
-
                 $pagetitle = $data->title;
                 $content   = $this->loadTheme("specials", $data);
 
@@ -281,7 +289,7 @@ class VRPConnector
                     /* echo "<pre>";
                       print_r($data->results);
                       echo "</pre>"; */
-                    echo " <!-- Vacation Rental Platform : $time2 -->. ";
+                    echo ' <!-- Vacation Rental Platform : ' . esc_attr($time2) . ' -->. ';
                 }
 
                 if (isset($data->type)) {
@@ -309,8 +317,8 @@ class VRPConnector
                 break;
 
             case "book":
-
-                if ($_GET['slug'] == 'dobooking') {
+	
+                if ($query->query_vars['slug'] == 'dobooking') {
                     if (isset($_SESSION['package'])) {
                         $_POST['booking']['packages'] = $_SESSION['package'];
                     }
@@ -320,7 +328,7 @@ class VRPConnector
                     $userinfo             = $this->doLogin($_POST['email'], $_POST['password']);
                     $_SESSION['userinfo'] = $userinfo;
                     if (!isset($userinfo->Error)) {
-                        $_GET['slug'] = "step3";
+                        $query->query_vars['slug'] = "step3";
                     }
                 }
 
@@ -334,7 +342,7 @@ class VRPConnector
                     $data->new = true;
                 }
 
-                if ($_GET['slug'] != 'confirm') {
+                if ($query->query_vars['slug'] != 'confirm') {
                     $data      = json_decode($this->checkavailability(false, true));
                     $data->new = true;
                 }
@@ -343,7 +351,7 @@ class VRPConnector
                 //if ($_GET['slug']=='step2'){
                 $data->booksettings = $this->bookSettings($data->PropID);
 
-                if ($_GET['slug'] == 'step1') {
+                if ($query->query_vars['slug'] == 'step1') {
                     unset($_SESSION['package']);
                 }
 
@@ -355,21 +363,21 @@ class VRPConnector
                     $data->package = $_SESSION['package'];
                 }
 
-                if ($_GET['slug'] == 'step1a') {
+                if ($query->query_vars['slug'] == 'step1a') {
                     if (isset($data->booksettings->HasPackages)) {
                         $a              = date("Y-m-d", strtotime($data->Arrival));
                         $d              = date("Y-m-d", strtotime($data->Departure));
                         $data->packages = json_decode($this->call("getpackages/$a/$d/"));
                     } else {
-                        $_GET['slug'] = 'step2';
+                        $query->query_vars['slug'] = 'step2';
                     }
                 }
 
-                if ($_GET['slug'] == 'step3') {
+                if ($query->query_vars['slug'] == 'step3') {
                     $data->form = json_decode($this->call("bookingform/"));
                 }
 
-                if ($_GET['slug'] == 'confirm') {
+                if ($query->query_vars['slug'] == 'confirm') {
                     $data->thebooking = json_decode($_SESSION['bresults']);
                     $pagetitle        = "Reservations";
                     $content          = $this->loadTheme("confirm", $data);
@@ -390,13 +398,15 @@ class VRPConnector
 
     public function villafilter()
     {
-        if (!isset($_GET['action'])) {
+        if (!$this->is_vrp_page()) {
             return;
         }
 
-        if ($_GET['action'] == 'complexsearch') {
+        if ('complexsearch' == $this->action) {
             if ($_GET['search']['type'] == 'Villa') {
-                $_GET['action'] = 'search';
+                $this->action = 'search';
+				global $wp_query;
+				$wp_query->query_vars['action']=$this->action;
             }
         }
     }
@@ -419,7 +429,7 @@ class VRPConnector
         include TEMPLATEPATH . "/vrp/unitsresults.php";
         $content = ob_get_contents();
         ob_end_clean();
-        echo $content;
+        echo wp_kses_post($content);
     }
 
     public function search()
@@ -642,7 +652,7 @@ class VRPConnector
 
         if (isset($_GET['printme'])) {
             include $this->theme . "/print.php";
-            die();
+            exit;
         }
 
         $this->debug['data']       = $data;
@@ -665,7 +675,7 @@ class VRPConnector
         if (method_exists($this, $act)) {
             $this->$act($par);
         }
-        die();
+        exit;
     }
 
     public function checkavailability($par = false, $ret = false)
@@ -682,14 +692,14 @@ class VRPConnector
 
         if ($par != false) {
             $_SESSION['bookingresults'] = $results;
-            echo $results;
+            echo wp_kses_post($results);
             return false;
         }
 
         $res = json_decode($results);
 
         if (isset($res->Error)) {
-            echo $res->Error;
+            echo esc_html($res->Error);
         } else {
             $_SESSION['bookingresults'] = $results;
             echo "1";
@@ -708,7 +718,7 @@ class VRPConnector
         if (isset($res->Results)) {
             $_SESSION['bresults'] = json_encode($res->Results);
         }
-        echo $results;
+        echo wp_kses_post($results);
     }
 
     public function addtopackage()
@@ -774,15 +784,15 @@ class VRPConnector
         include "xml.php";
         $content = ob_get_contents();
         ob_end_clean();
-        echo $content;
-        die();
+        echo wp_kses_post($content);
+        exit;
     }
 
     public function xmlexport()
     {
         header("Content-type: text/xml");
-        echo $this->customcall("generatexml");
-        die();
+        echo wp_kses($this->customcall("generatexml"));
+        exit;
     }
 
     public function robots_mod($output, $public)
@@ -806,20 +816,25 @@ class VRPConnector
      */
     public function call($call, $params = array())
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->apiURL . $this->apiKey . "/" . $call);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        $results = curl_exec($ch);
-        curl_close($ch);
-        return $results;
+		$cache_key	 = md5( $call . implode( '_', $params ) );
+		$results	 = wp_cache_get( $cache_key, 'vrp' );
+		if ( false == $results ) {
+			$ch		 = curl_init();
+			curl_setopt( $ch, CURLOPT_URL, $this->apiURL . $this->apiKey . "/" . $call );
+			curl_setopt( $ch, CURLOPT_POST, 1 );
+			curl_setopt( $ch, CURLOPT_POSTFIELDS, $params );
+			curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+			curl_setopt( $ch, CURLOPT_HEADER, 0 );
+			$results = curl_exec( $ch );
+			curl_close( $ch );
+			wp_cache_set( $cache_key, $results, 'vrp', 300 ); // 5 Minutes.
+		}
+		return $results;
     }
 
     public function customcall($call)
     {
-        echo $this->call("customcall/$call");
+        echo wp_kses($this->call("customcall/$call"));
     }
 
     public function custompost($call)
@@ -832,7 +847,7 @@ class VRPConnector
         $search['search']       = json_encode($obj);
         $results                = $this->call($call, $search);
         $this->debug['results'] = $results;
-        echo $results;
+        echo wp_kses($results);
     }
 
     public function bookSettings($propID)
@@ -859,8 +874,9 @@ class VRPConnector
     public function featuredunit()
     {
         if (isset($_GET['featuredunit'])) {
-            echo $this->call("featuredunit");
-            die();
+            $featured_unit=json_decode($this->call("featuredunit"));
+			wp_send_json($featured_unit);
+            exit;
         }
     }
 
@@ -881,10 +897,10 @@ class VRPConnector
         $data = $this->customcall($call);
         echo "<!DOCTYPE html><html>";
         echo "<body>";
-        echo $data;
+        echo wp_kses_post($data);
         echo "</body></html>";
-        die();
-    }
+        exit;
+	}
 
     //
     //  Shortcode methods
@@ -1247,18 +1263,14 @@ class VRPConnector
 
     public function apiKeySettingTitleCallback()
     {
-        echo "<p>Your API Key can be found in the settings section after
-        logging in to <a href='http://www.gueststream.net'>Gueststream.net</a>.</p>
-        <p>Demo API Key: <strong>1533020d1121b9fea8c965cd2c978296</strong>
-        The Demo API Key does not contain bookable units therfor availability searches
-        will not work.
-        </p>
-        ";
+        echo "<p>Your API Key can be found in the settings section after logging in to <a href='http://www.gueststream.net'>Gueststream.net</a>.</p>
+        <p>Don't have an account? <a href='http://www.gueststream.com/apps-and-tools/vrpconnector-sign-up-page/'>Click Here</a> to learn more about getting a <a href='http://www.gueststream.net'>Gueststream.net</a> account.</p>
+        <p>Demo API Key: <strong>1533020d1121b9fea8c965cd2c978296</strong> The Demo API Key does not contain bookable units therfor availability searches will not work.</p>";
     }
 
     public function apiKeyCallback()
     {
-        echo '<input type="text" name="vrpAPI" value="'.get_option('vrpAPI').'" style="width:400px;"/>';
+        echo '<input type="text" name="vrpAPI" value="'.esc_attr(get_option('vrpAPI')).'" style="width:400px;"/>';
     }
 
     public function vrpThemeSettingTitleCallback()
@@ -1272,11 +1284,11 @@ class VRPConnector
         foreach ($this->available_themes as $name => $displayname) {
             $sel = "";
             if ($name == $this->themename) {$sel = "SELECTED";}
-            echo '<option value="'.$name.'" '.$sel.'>'.$displayname.'</option>';
+            echo '<option value="'. esc_attr($name).'" '.esc_attr($sel).'>'.esc_attr($displayname).'</option>';
         }
         echo '</select>';
     }
-
+	
     /**
      * Displays the 'VRP Login' admin page.
      */
@@ -1317,43 +1329,27 @@ class VRPConnector
         return json_decode(file_get_contents($url));
     }
 
-    //
-    // File Caching Methods
-    //
-
-    /**
-     * store cache item.
-     *
-     * @param string $action
-     * @param string $slug
-     * @param        $object [] $object
-     */
-    public function cache($action, $slug, $object)
-    {
-        return; // Removing file cache.
-    }
-
-    /**
-     * get Cached item
-     *
-     * @param $action
-     * @param $slug
-     *
-     * @return bool
-     */
-    public function getCache($action, $slug)
-    {
-        return false; // Removing file cache.
-    }
-
-    /**
-     * Removes cached file.
-     *
-     * @param $param [] $param
-     */
-    public function clearCache($file, $action, $slug)
-    {
-       return; // Removing file cache
-    }
-
+	/**
+	 * Checks to see if the page loaded is a VRP page.
+	 * Formally $_GET['action'].
+	 * @global WP_Query $wp_query
+	 * @return bool
+	 */
+	public function is_vrp_page()
+	{
+		global $wp_query;
+		if (isset($wp_query->query_vars['action'])){ // Is VRP page.
+			$this->action=$wp_query->query_vars['action'];
+			return true;
+		}
+		return false;
+	}
+	
+	public function remove_filters()
+	{
+		 if ( $this->is_vrp_page() ) {
+			remove_filter( 'the_content', 'wptexturize' );
+			remove_filter( 'the_content', 'wpautop' );
+		}
+	}
 }
