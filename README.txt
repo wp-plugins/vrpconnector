@@ -39,6 +39,9 @@ you to seamlessly connect your website to your property management software data
 1. Out of the box unit page.
 
 == Changelog ==
+= 0.10 =
+* Better support for Specials themes and added [vrpSpecials] shortcode.
+
 = 0.09 =
 * Added ability for users to favorite units, view & share their list of favorites.
 
@@ -53,6 +56,9 @@ you to seamlessly connect your website to your property management software data
 * Initial Release
 
 == Upgrade Notice ==
+= 0.10 =
+* Display Specials by category or individually with the use of shortcodes.
+
 = 0.09 =
 * Users can now build a list of favorite units.
 
