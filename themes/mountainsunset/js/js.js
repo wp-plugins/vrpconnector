@@ -1,3 +1,86 @@
+(function($, global, undefined){
+    /* Handles */
+    $(function(){
+
+        $('.vrpshowing').change(function() {
+
+            var that = $(this);
+
+            if(that.val() == '') {
+                return;
+            }
+
+            location.search = VRP.queryString.formatQueryString(that.val());
+
+        });
+
+        $('.vrpsorter').change(function() {
+
+            var that = $(this);
+
+            if(that.val() == '') {
+                return;
+            }
+
+            location.search = VRP.queryString.formatQueryString(that.val());
+        });
+
+
+        $('.vrpsorter').change(function() {
+
+            var that = $(this);
+
+            if(that.val() == '') {
+                return;
+            }
+
+            location.search = VRP.queryString.formatQueryString(that.val());
+        });
+
+        $('.vrp-cd-pagination a').click(function(e){
+
+            e.preventDefault();
+
+            var that = $(this),
+                parameters = that.attr('href');
+
+            if(that.hasClass('current') || that.hasClass('disabled')) {
+                return;
+            }
+
+            location.search = VRP.queryString.formatQueryString(parameters);
+
+        });
+
+        $('.vrp-thumbnail').hover(function(e){
+
+            var that = $(this).parent(),
+                index = $('.vrp-item').index(that);
+
+            VRP.ui.overlay(that, index, e);
+
+        }, function(e) {
+
+            var that = $(this).parent(),
+                index = $('.vrp-item').index(that);
+
+            VRP.ui.overlay(that, index, e);
+
+        });
+
+        $('#vrp-list').click(function(e) {
+            e.preventDefault();
+            $('.list-grid-layout').attr('class', 'col-xs-12 list-grid-layout vpr-list-style');
+        });
+
+        $('#vrp-grid').click(function(e){
+            e.preventDefault();
+            $('.list-grid-layout').attr('class', 'col-md-4 col-xs-6 col-sm-12 vpr-list-grid-layout vpr-grid-style');
+        });
+
+    });
+}(jQuery, window));
+
 jQuery(document).ready(function(){
 
     // Unit Page Tabs
@@ -15,11 +98,6 @@ jQuery(document).ready(function(){
         var showImage = "#full"+photoid;
         jQuery("#photo img").hide();
         jQuery("#photo "+showImage).show();
-    });
-
-    jQuery(".vrpsorter").change(function(){
-        var url=jQuery(this).val();
-        window.location=url;
     });
 
     var inquireopen=false;
@@ -400,22 +478,21 @@ function checkavailability(){
         }
     });
 }
-
-function ratebreakdown(obj){
-    var tbl=jQuery("#ratebreakdown");
+function ratebreakdown(obj) {
+    var tbl = jQuery("#ratebreakdown");
     console.log(obj);
     tbl.empty();
-    for (var i in obj.Charges){
-        var row="<tr><td>" + obj.Charges[i].Description + "</td><td>$" + obj.Charges[i].Amount + "</td></tr>";
+    for (var i in obj.Charges) {
+        var row = "<tr><td>" + obj.Charges[i].Description + "</td><td>$" + obj.Charges[i].Amount + "</td></tr>";
         tbl.append(row);
     }
     if (obj.HasInsurance && obj.HasInsurance == 1) {
-        var row="<tr><td>Insurance</td><td>$" + obj.InsuranceAmount + "</td></tr>";
+        var row = "<tr><td>Insurance</td><td>$" + obj.InsuranceAmount + "</td></tr>";
         tbl.append(row);
     }
-    var tax="<tr><td>Tax:</td><td>$" + obj.TotalTax + "</td></tr>";
-    var total="<tr><td><b>Total Cost:</b></td><td><b>$" + obj.TotalCost + "</b></td></tr>";
-    var totaldue="<tr class='success'><td><b>Total Due Now:</b></td><td><b>$" + obj.DueToday + "</b></td></tr>";
+    var tax = "<tr><td>Tax:</td><td>$" + obj.TotalTax + "</td></tr>";
+    var total = "<tr><td><b>Total Cost:</b></td><td><b>$" + obj.TotalCost + "</b></td></tr>";
+    var totaldue = "<tr class='success'><td><b>Total Due Now:</b></td><td><b>$" + obj.DueToday + "</b></td></tr>";
 
     tbl.append(tax);
     tbl.append(total);

@@ -20,6 +20,7 @@ class VRPConnector
     public $debug = array();                       // Container for debug data
     public $action = false; // VRP Action
     public $favorites;
+    private $pageTitle;
 
     /**
      * Class Construct
@@ -89,12 +90,12 @@ class VRPConnector
         add_action('init', array($this, 'rewrite'));
         add_action('init', array($this, 'villafilter'));
         add_action('parse_request', array($this, 'router'));
-		add_action('update_option_vrpApiKey',array($this,'flush_rewrites'),10,2);
-		add_action('update_option_vrpAPI',array($this,'flush_rewrites'),10,2);
-		add_action( 'wp', array( $this, 'remove_filters' ) );
-		add_action('pre_get_posts', array($this, 'query_template'));
-		
-		// Filters
+        add_action('update_option_vrpApiKey', array($this, 'flush_rewrites'), 10, 2);
+        add_action('update_option_vrpAPI', array($this, 'flush_rewrites'), 10, 2);
+        add_action('wp', array($this, 'remove_filters'));
+        add_action('pre_get_posts', array($this, 'query_template'));
+
+        // Filters
         add_filter('robots_txt', array($this, 'robots_mod'), 10, 2);
         remove_filter('template_redirect', 'redirect_canonical');
 
@@ -136,21 +137,24 @@ class VRPConnector
             include $this->theme . "/functions.php";
         }
     }
-	/**
-	 * Alters WP_Query to tell it to load the page template instead of home.
-	 * @param WP_Query $query
-	 * @return WP_Query
-	 */
-	public function query_template($query)
-	{
-		if (!isset($query->query_vars['action'])) {
+
+    /**
+     * Alters WP_Query to tell it to load the page template instead of home.
+     *
+     * @param WP_Query $query
+     *
+     * @return WP_Query
+     */
+    public function query_template($query)
+    {
+        if (!isset($query->query_vars['action'])) {
             return $query;
         }
-		$query->is_page=true;
-		$query->is_home=false;
-		return $query;
-	}
-	
+        $query->is_page = true;
+        $query->is_home = false;
+        return $query;
+    }
+
     public function themeActions()
     {
         $theme = new $this->themename;
@@ -279,7 +283,7 @@ class VRPConnector
 
             case "favorites":
                 $content = "hi";
-                switch($slug) {
+                switch ($slug) {
                     case "add":
                         $this->addFavorite();
                         break;
@@ -297,16 +301,15 @@ class VRPConnector
                 }
                 break;
 
-            case "special": // If Special Page.
-                $data = json_decode($this->call("getspecial/" . $slug));
-                $pagetitle = $data->title;
-                $content = $this->loadTheme("specials", $data);
+            case "specials": // If Special Page.
+                $content = $this->specialPage($slug);
+                $pagetitle = $this->pageTitle; //
                 break;
 
             case "search": // If Search Page.
                 $data = json_decode($this->search());
 
-                if($data->count > 0) {
+                if ($data->count > 0) {
                     $data = $this->prepareSearchResults($data);
                 }
 
@@ -405,6 +408,30 @@ class VRPConnector
         }
 
         return [new DummyResult(0, $pagetitle, $content)];
+    }
+
+    private function specialPage($slug)
+    {
+        if ($slug == "list") {
+            // Special by Category
+            $data = json_decode($this->call("getspecialsbycat/1"));
+            $this->pageTitle = "Specials";
+            return $this->loadTheme("specials", $data);
+        }
+
+        if (is_numeric($slug)) {
+            // Special by ID
+            $data = json_decode($this->call("getspecialbyid/" . $slug));
+            $this->pageTitle = $data->title;
+            return $this->loadTheme("special", $data);
+        }
+
+        if (is_string($slug)) {
+            // Special by slug
+            $data = json_decode($this->call("getspecial/" . $slug));
+            $this->pageTitle = $data->title;
+            return $this->loadTheme("special", $data);
+        }
     }
 
     public function villafilter()
@@ -793,17 +820,17 @@ class VRPConnector
 
     private function addFavorite()
     {
-        if(!isset($_GET['unit'])) {
+        if (!isset($_GET['unit'])) {
             return false;
         }
 
-        if(!isset($_SESSION['favorites'])) {
+        if (!isset($_SESSION['favorites'])) {
             $_SESSION['favorites'] = [];
         }
 
         $unit_id = $_GET['unit'];
-        if(!in_array($unit_id,$_SESSION['favorites'])) {
-            array_push($_SESSION['favorites'],$unit_id);
+        if (!in_array($unit_id, $_SESSION['favorites'])) {
+            array_push($_SESSION['favorites'], $unit_id);
         }
 
         exit;
@@ -811,15 +838,15 @@ class VRPConnector
 
     private function removeFavorite()
     {
-        if(!isset($_GET['unit'])) {
+        if (!isset($_GET['unit'])) {
             return false;
         }
-        if(!isset($_SESSION['favorites'])){
+        if (!isset($_SESSION['favorites'])) {
             return false;
         }
         $unit = $_GET['unit'];
-        foreach($this->favorites as $key => $unit_id) {
-            if($unit == $unit_id) {
+        foreach ($this->favorites as $key => $unit_id) {
+            if ($unit == $unit_id) {
                 unset($this->favorites[$key]);
             }
         }
@@ -855,16 +882,16 @@ class VRPConnector
 
         $obj = new \stdClass();
 
-        if(!isset($_GET['favorites'])) {
-            if(count($this->favorites) == 0) {
+        if (!isset($_GET['favorites'])) {
+            if (count($this->favorites) == 0) {
                 return $this->loadTheme('vrpFavoritesEmpty');
             }
 
             $url_string = site_url() . "/vrp/favorites/show?";
-            foreach($this->favorites as $unit_id) {
-                $url_string .= "&favorites[]=".$unit_id;
+            foreach ($this->favorites as $unit_id) {
+                $url_string .= "&favorites[]=" . $unit_id;
             }
-            header("Location: ".$url_string);
+            header("Location: " . $url_string);
         }
 
         $compare = $_GET['favorites'];
@@ -885,8 +912,8 @@ class VRPConnector
         $obj->items = $compare;
         sort($obj->items);
         $search['search'] = json_encode($obj);
-        $results = json_decode($this->call('compare',$search));
-        if(count($results->results) == 0) {
+        $results = json_decode($this->call('compare', $search));
+        if (count($results->results) == 0) {
             return $this->loadTheme('vrpFavoritesEmpty');
         }
 
@@ -897,8 +924,8 @@ class VRPConnector
 
     private function setFavorites()
     {
-        if(isset($_SESSION['favorites'])) {
-            foreach($_SESSION['favorites'] as $unit_id){
+        if (isset($_SESSION['favorites'])) {
+            foreach ($_SESSION['favorites'] as $unit_id) {
                 $this->favorites[] = (int) $unit_id;
             }
             return;
@@ -1362,9 +1389,10 @@ class VRPConnector
         $this->setFavorites();
     }
 
-    private function prepareSearchResults($data) {
-        foreach($data->results as $key => $unit ) {
-            if(strlen($unit->Thumb) == 0) {
+    private function prepareSearchResults($data)
+    {
+        foreach ($data->results as $key => $unit) {
+            if (strlen($unit->Thumb) == 0) {
                 // Replacing non-existent thumbnails w/full size Photo URL
                 $unit->Thumb = $unit->Photo;
             }
