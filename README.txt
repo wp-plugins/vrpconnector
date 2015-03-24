@@ -16,9 +16,9 @@ allowing potential guests to search, sort, compare and book your rental properti
 
 = Example Sites =
 * http://www.grandcaymanvillas.net
-* http://www.breckenridgeloging.com
 * http://www.mauihawaiivacations.com
 * http://www.tellurideluxury.com
+* http://www.columbiatelluride.com
 
 == Installation ==
 1. Install the plugin from the WordPress.org Plugin Directory here https://wordpress.org/plugins/vrpconnector/
