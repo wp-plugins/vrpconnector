@@ -39,7 +39,7 @@ you to seamlessly connect your website to your property management software data
 1. Out of the box unit page.
 
 == Changelog ==
-= 0.10 =
+= 1.0.0 =
 * Better support for Specials themes and added [vrpSpecials] shortcode.
 
 = 0.09 =
