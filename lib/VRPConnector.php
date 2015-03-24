@@ -723,12 +723,7 @@ class VRPConnector
      */
     public function call($call, $params = [])
     {
-        if (count($params) > 0) {
-            $cache_key = md5($call . implode('_', $params));
-        } else {
-            $cache_key = md5($call);
-        }
-
+        $cache_key = md5($call . json_encode($params));
         $results = wp_cache_get($cache_key, 'vrp');
         if (false == $results) {
             $ch = curl_init();
