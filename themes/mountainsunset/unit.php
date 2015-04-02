@@ -194,6 +194,7 @@ if (!isset($_SESSION['depart'])) {
             <div id="rates">
                 <div class="row">
                     <h3>Seasonal Rates</h3>
+
                     <div id="rates">
                         <?php
                         $r = array();
@@ -242,7 +243,6 @@ if (!isset($_SESSION['depart'])) {
             </div>
 
 
-
         </div>
     </div>
 </div>
@@ -269,26 +269,22 @@ if (!isset($_SESSION['depart'])) {
     }
 
     function codeAddress() {
+        var query = "<?php echo esc_js( $data->Address ) . " " . esc_js( $data->Address2 ) . " " . esc_js( $data->City ) . " " . esc_js( $data->State ) . " " . esc_js( $data->PostalCode ); ?>";
         var address = query;
         geocoder.geocode({'address': address}, function (results, status) {
-            if (status == google.maps.GeocoderStatus.OK) {
-                map.setCenter(results[0].geometry.location);
-                var marker = new google.maps.Marker({
-                    map: map,
-                    position: results[0].geometry.location,
-                    var query = "<?php echo esc_js( $data->Address ) . " " . esc_js( $data->Address2 ) . " " . esc_js( $data->City ) . " " . esc_js( $data->State ) . " " . esc_js( $data->PostalCode ); ?>";
-                //icon: image
+                if (status == google.maps.GeocoderStatus.OK) {
+                    map.setCenter(results[0].geometry.location);
+                    var marker = new google.maps.Marker({
+                                map: map,
+                                position: results[0].geometry.location,
+                                //icon: image
+                            });
+                } else {
+                    //alert("Geocode was not successful for the following reason: " + status);
+                }
             }
-            )
-            ;
-        }
-    else
-        {
-            alert("Geocode was not successful for the following reason: " + status);
-        }
-    }
-    )
-    ;
+        )
+        ;
     }
     jQuery(document).ready(function () {
         jQuery("#gmaplink").on('click', function () {

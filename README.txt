@@ -39,6 +39,9 @@ you to seamlessly connect your website to your property management software data
 1. Out of the box unit page.
 
 == Changelog ==
+= 1.0.2 =
+* Fixed var decleration inside of a hash map.
+
 = 1.0.1 =
 * Fixed bug in unit page mapping JS.
 
