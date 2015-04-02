@@ -251,10 +251,8 @@ if (!isset($_SESSION['depart'])) {
 <!-- GOOGLE MAPS SCRIPT -->
 
 <script type="text/javascript">
-    var geocoder;
-    var map;
-    value = "<?php echo esc_attr( $data->id ); ?>" >
-    var image = '<?php bloginfo( 'template_directory' ); ?>/images/mapicon.png';
+    var geocoder, map, value = "<?php echo esc_attr( $data->id ); ?>", image = '<?php bloginfo( 'template_directory' ); ?>/images/mapicon.png';
+
     function initialize() {
         geocoder = new google.maps.Geocoder();
         var myOptions = {
