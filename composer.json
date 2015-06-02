@@ -1,8 +1,0 @@
-{
-    "require": {
-	"erusev/parsedown": "dev-master"
-    },
-    "autoload": {
-	"psr-4": { "Gueststream\\": "lib/"}
-    }
-}
