@@ -1690,6 +1690,61 @@ animated buttons - animate the text inside prev and next buttons
     display: none;
 }
 
+/**********************************
+ CALENDAR STYLING
+ **********************************/
+.calendar tbody, .calkey .isavailable {
+  background: #7FFFD4;
+}
+
+.calendar tbody, .calkey .isavailable, .calendar .highlighted.aDate, .calendar .highlighted.dDate {
+    color: #25383C;
+}
+    .calendar .pad {
+        background: #fff;
+    }
+
+    .calendar .dDate, .calendar .highlighted.dDate, .calkey .isavailable.dDate {
+        background: rgb(255,240,245);
+        background: -moz-linear-gradient(45deg,  rgba(255,240,245,1) 0%, rgba(255,240,245,1) 51%, rgba(255,240,245,1) 51%, rgba(127,255,212,1) 51%, rgba(127,255,212,1) 100%);
+        background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,rgba(255,240,245,1)), color-stop(51%,rgba(255,240,245,1)), color-stop(51%,rgba(255,240,245,1)), color-stop(51%,rgba(127,255,212,1)), color-stop(100%,rgba(127,255,212,1)));
+        background: -webkit-linear-gradient(45deg,  rgba(255,240,245,1) 0%,rgba(255,240,245,1) 51%,rgba(255,240,245,1) 51%,rgba(127,255,212,1) 51%,rgba(127,255,212,1) 100%);
+        background: -o-linear-gradient(45deg,  rgba(255,240,245,1) 0%,rgba(255,240,245,1) 51%,rgba(255,240,245,1) 51%,rgba(127,255,212,1) 51%,rgba(127,255,212,1) 100%);
+        background: -ms-linear-gradient(45deg,  rgba(255,240,245,1) 0%,rgba(255,240,245,1) 51%,rgba(255,240,245,1) 51%,rgba(127,255,212,1) 51%,rgba(127,255,212,1) 100%);
+        background: linear-gradient(45deg,  rgba(255,240,245,1) 0%,rgba(255,240,245,1) 51%,rgba(255,240,245,1) 51%,rgba(127,255,212,1) 51%,rgba(127,255,212,1) 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fff0f5', endColorstr='#7fffd4',GradientType=1 );
+    }
+
+    .calendar .aDate, .calendar .highlighted.aDate, .calkey .isavailable.aDate {
+        background: rgb(127,255,212);
+        background: -moz-linear-gradient(45deg,  rgba(127,255,212,1) 0%, rgba(127,255,212,1) 49%, rgba(255,240,245,1) 49%, rgba(255,240,245,1) 49%, rgba(255,240,245,1) 100%);
+        background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,rgba(127,255,212,1)), color-stop(49%,rgba(127,255,212,1)), color-stop(49%,rgba(255,240,245,1)), color-stop(49%,rgba(255,240,245,1)), color-stop(100%,rgba(255,240,245,1)));
+        background: -webkit-linear-gradient(45deg,  rgba(127,255,212,1) 0%,rgba(127,255,212,1) 49%,rgba(255,240,245,1) 49%,rgba(255,240,245,1) 49%,rgba(255,240,245,1) 100%);
+        background: -o-linear-gradient(45deg,  rgba(127,255,212,1) 0%,rgba(127,255,212,1) 49%,rgba(255,240,245,1) 49%,rgba(255,240,245,1) 49%,rgba(255,240,245,1) 100%);
+        background: -ms-linear-gradient(45deg,  rgba(127,255,212,1) 0%,rgba(127,255,212,1) 49%,rgba(255,240,245,1) 49%,rgba(255,240,245,1) 49%,rgba(255,240,245,1) 100%);
+        background: linear-gradient(45deg,  rgba(127,255,212,1) 0%,rgba(127,255,212,1) 49%,rgba(255,240,245,1) 49%,rgba(255,240,245,1) 49%,rgba(255,240,245,1) 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7fffd4', endColorstr='#fff0f5',GradientType=1 );
+    }
+
+    .calendar .highlighted, .calendar .aDate.dDate, .calkey .highlighted {
+      background: rgb(255, 240, 245);
+      color: rgb(204, 204, 204);
+    }
+
+    td.passed, td.today.highlighted.aDate {
+        background: #DADADA;
+        color: #ABABAB;
+    }
+
+    td.today {
+        -webkit-box-shadow: inset 0px 0px 0px 2px rgba(225,174,127,1);
+        -moz-box-shadow: inset 0px 0px 0px 2px rgba(225,174,127,1);
+        box-shadow: inset 0px 0px 0px 2px rgba(225,174,127,1);
+    }
+
+
+
+
 
 /**********************************
  OVERLAY & MAP STYLING

@@ -174,13 +174,15 @@ class Calendar
 
             if (is_array($this->highlighted_dates)) {
                 if (in_array($day_date, $this->highlighted_dates)) {
-                    if (in_array($day_date, $this->depart_dates) && !in_array($day_date, $this->arrival_dates)) {
-                        $classes[] = $this->depart_class;
-                    } elseif (in_array($day_date, $this->arrival_dates)) {
-                        $classes[] = $this->arrival_class;
-                    } else {
-                        $classes[] = $this->default_highlighted_class;
-                    }
+                     $classes[] = $this->default_highlighted_class;
+                        if ( in_array($day_date, $this->arrival_dates) ) {
+                                $classes[] .= $this->arrival_class;
+                        }
+
+                        if ( in_array($day_date, $this->depart_dates) ) {
+                            $classes[] .= $this->depart_class;
+                        }
+                    
                 }
             }
 
