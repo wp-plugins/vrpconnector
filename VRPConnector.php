@@ -6,7 +6,7 @@
  * Author: GuestStream, Inc.
  * Version: 1.0.2
  * Author URI: http://www.gueststream.com/
- */
+ */ 
 
 if ( !isset( $_SESSION ) ) {
 	@session_start();
