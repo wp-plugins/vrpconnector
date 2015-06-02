@@ -17,6 +17,7 @@ https://github.com/Gueststream-Inc/VRPConnector/wiki/Installation
 * http://www.tellurideluxury.com
 * http://www.suite-paradise.com
 * http://www.columbiatelluride.com
+* http://www.rangeprop.com
 
 ## Frequently Asked Questions ##
 
