@@ -5,7 +5,7 @@
  * Description: Vacation Rental Platform Connector.
  * Author: GuestStream, Inc.
  * Version: 1.0.2
- * Author URI: http://www.gueststream.com/ 
+ * Author URI: http://www.gueststream.com/
  */
 
 if ( !isset( $_SESSION ) ) {
