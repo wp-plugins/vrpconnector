@@ -6,15 +6,15 @@
         "source": {
             "type": "git",
             "url": "https://github.com/erusev/parsedown.git",
-            "reference": "790066e9a7dbac9b1441005b902531ec9de0ed00"
+            "reference": "ee819677499bbe0f00af4b2ae069b29eb22ae611"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/erusev/parsedown/zipball/790066e9a7dbac9b1441005b902531ec9de0ed00",
-            "reference": "790066e9a7dbac9b1441005b902531ec9de0ed00",
+            "url": "https://api.github.com/repos/erusev/parsedown/zipball/ee819677499bbe0f00af4b2ae069b29eb22ae611",
+            "reference": "ee819677499bbe0f00af4b2ae069b29eb22ae611",
             "shasum": ""
         },
-        "time": "2015-05-26 10:37:45",
+        "time": "2015-07-03 14:11:23",
         "type": "library",
         "installation-source": "source",
         "autoload": {
